@@ -1,0 +1,10 @@
+// Settings in here override those in "Default/Preferences.sublime-settings",
+// and are overridden in turn by syntax-specific settings.
+{
+
+	"diff_style": "inline",
+	"editor_argument_format": "--remote +${line} ${file}",
+	"editor_path": "gvim",
+	"ignore_diff_white_space": true,
+	"theme": "Merge Dark.sublime-theme",
+}
