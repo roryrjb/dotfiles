@@ -1,0 +1,5 @@
+[user]
+	name = Rory Bradford
+[core]
+	autocrlf = false
+	excludesFile = ~/.gitignore
