@@ -9,7 +9,7 @@
  '(dtrt-indent-global-mode t)
  '(inhibit-startup-screen t)
  '(package-selected-packages
-   '(modus-themes goto-chg avy doric-themes smex ido-completing-read+ dtrt-indent magit markdown-mode multi-vterm typescript-mode vterm vue-mode yaml-mode))
+   '(ws-butler modus-themes goto-chg avy doric-themes smex ido-completing-read+ dtrt-indent magit markdown-mode multi-vterm typescript-mode vterm vue-mode yaml-mode))
  '(warning-suppress-log-types '((comp))))
 
 (custom-set-faces

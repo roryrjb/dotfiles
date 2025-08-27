@@ -80,3 +80,5 @@
               (signal-process proc 'SIGKILL)
               (message "Compilation process killed with SIGKILL"))))
       (message "No compilation buffer found"))))
+
+(add-hook 'prog-mode-hook #'ws-butler-mode)
