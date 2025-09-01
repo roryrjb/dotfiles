@@ -3,7 +3,6 @@
 (menu-bar-mode 0)
 (tool-bar-mode 0)
 (scroll-bar-mode 0)
-;; (global-display-line-numbers-mode)
 (global-hl-line-mode)
 
 (setq project-switch-commands 'project-dired)
@@ -16,7 +15,6 @@
 (setq magit-no-confirm '(discard delete stage-all-changes))
 (setq case-fold-search nil)
 (setq-default tab-width 2)
-;; (setq-default electric-indent-inhibit t) ; Don't actually know what this does
 
 (savehist-mode 1)
 (save-place-mode 1)
@@ -24,12 +22,23 @@
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 (setq use-package-always-ensure t)
-(setq avy-timeout-seconds 0.3)
 (package-initialize)
 
-(ido-ubiquitous-mode 1)
-(ido-mode 1)
-(ido-everywhere 1)
+(use-package vertico
+  :init
+  (vertico-mode))
+
+(use-package orderless
+  :custom
+  (completion-styles '(orderless basic))
+  (completion-category-defaults nil)
+  (completion-category-overrides '((file (styles partial-completion)))))
+
+(use-package marginalia
+  :bind (:map minibuffer-local-map
+         ("M-A" . marginalia-cycle))
+  :init
+  (marginalia-mode))
 
 (add-hook 'mmm-mode-hook
           (lambda ()
@@ -40,24 +49,26 @@
             (when-let ((project (project-current)))
               (setq default-directory (project-root project)))))
 
+(global-set-key (kbd "C-z") 'keyboard-quit)
+(global-set-key (kbd "C-.") 'embark-act)
+(global-set-key (kbd "C-x r") 'consult-ripgrep)
+(global-set-key (kbd "C-x b") 'consult-buffer)
+(global-set-key (kbd "C-x C-b") 'consult-buffer)
+(global-set-key (kbd "M-z") 'zap-up-to-char)
 (global-set-key (kbd "C-+") 'global-display-line-numbers-mode)
 (global-set-key (kbd "C-:") 'goto-line)
-(global-set-key (kbd "M-x") 'smex)
-(global-set-key (kbd "C-c C-o") 'goto-last-change)
-(global-set-key (kbd "C-<return>") 'compile)
+(global-set-key (kbd "C-o") 'goto-last-change)
+(global-set-key (kbd "C-x <return>") 'compile)
 (global-set-key (kbd "C-<end>") 'kill-compilation-hard)
-(global-unset-key (kbd "C-z")) ; suspend
 (global-set-key (kbd "C-S-d") 'duplicate-line)
-(global-set-key (kbd "C-p") 'dabbrev-expand) ; overrides C-p (previous-line), this might be a bad thing but it's in my muscle memory because of vim
+(global-set-key (kbd "C-p") 'dabbrev-expand)
 (global-set-key (kbd "C-x f") 'find-file)
-(global-set-key (kbd "C-x C-b") 'switch-to-buffer)
 (global-set-key (kbd "C-c t") 'multi-vterm)
 (global-set-key (kbd "C-S-k") 'kill-whole-line)
 (global-set-key (kbd "C-x C-k") 'kill-buffer)
 (global-set-key (kbd "C-x C-d") 'dired)
 (global-set-key (kbd "C->") 'next-error)
 (global-set-key (kbd "C-<") 'previous-error)
-(global-set-key (kbd "C-'") 'avy-goto-char-timer)
 
 (add-hook 'compilation-filter-hook 'ansi-color-compilation-filter)
 
@@ -82,3 +93,14 @@
       (message "No compilation buffer found"))))
 
 (add-hook 'prog-mode-hook #'ws-butler-mode)
+
+(defun my/turn-on-hl-line-mode ()
+  (hl-line-mode 1))
+
+(add-hook 'compilation-mode-hook #'my/turn-on-hl-line-mode)
+
+(defun my/update-compilation-hl-line ()
+  (with-current-buffer next-error-last-buffer
+    (when hl-line-mode (hl-line-highlight))))
+
+(add-hook 'next-error-hook 'my/update-compilation-hl-line)
