@@ -1,11 +1,13 @@
 (setq custom-file "~/.emacs.d/custom.el")
 
+(setq default-frame-alist
+      '((width . 140)
+        (height . 50)))
+
 (menu-bar-mode 0)
 (tool-bar-mode 0)
 (scroll-bar-mode 0)
-(global-hl-line-mode)
 
-(setq project-switch-commands 'project-dired)
 (setq compile-command "")
 (setq ring-bell-function 'ignore)
 (setq default-directory-tracking nil)
@@ -16,50 +18,65 @@
 (setq case-fold-search nil)
 (setq-default tab-width 2)
 
-(savehist-mode 1)
 (save-place-mode 1)
-
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 (setq use-package-always-ensure t)
 (package-initialize)
 
+(use-package magit
+  :ensure t)
+
+(use-package dtrt-indent
+  :ensure t
+  :init
+  (dtrt-indent-global-mode))
+
+(use-package savehist
+  :init
+  (savehist-mode))
+
 (use-package vertico
+  :ensure t
   :init
   (vertico-mode))
 
 (use-package orderless
+  :ensure t
   :custom
   (completion-styles '(orderless basic))
   (completion-category-defaults nil)
   (completion-category-overrides '((file (styles partial-completion)))))
 
-(use-package marginalia
-  :bind (:map minibuffer-local-map
-         ("M-A" . marginalia-cycle))
+(use-package vterm
+  :ensure t)
+
+(use-package multi-vterm
+  :ensure t)
+
+(use-package project
   :init
-  (marginalia-mode))
+  (setq project-switch-commands 'project-dired)
+  (add-hook 'find-file-hook
+            (lambda ()
+              (when-let ((project (project-current)))
+                (setq default-directory (project-root project))))))
 
-(add-hook 'mmm-mode-hook
-          (lambda ()
-            (set-face-background 'mmm-default-submode-face nil)))
+(use-package typescript-mode
+  :ensure t)
 
-(add-hook 'find-file-hook
-          (lambda ()
-            (when-let ((project (project-current)))
-              (setq default-directory (project-root project)))))
+(use-package goto-chg
+  :ensure t
+  :init
+  (global-set-key (kbd "C-z") 'goto-last-change))
 
-(global-set-key (kbd "C-z") 'keyboard-quit)
-(global-set-key (kbd "C-.") 'embark-act)
-(global-set-key (kbd "C-x r") 'consult-ripgrep)
-(global-set-key (kbd "C-x b") 'consult-buffer)
-(global-set-key (kbd "C-x C-b") 'consult-buffer)
-(global-set-key (kbd "M-z") 'zap-up-to-char)
+(use-package doric-themes
+  :ensure t)
+
+(global-set-key (kbd "C-x C-b") 'switch-to-buffer)
 (global-set-key (kbd "C-+") 'global-display-line-numbers-mode)
 (global-set-key (kbd "C-:") 'goto-line)
-(global-set-key (kbd "C-o") 'goto-last-change)
 (global-set-key (kbd "C-x <return>") 'compile)
-(global-set-key (kbd "C-<end>") 'kill-compilation-hard)
 (global-set-key (kbd "C-S-d") 'duplicate-line)
 (global-set-key (kbd "C-p") 'dabbrev-expand)
 (global-set-key (kbd "C-x f") 'find-file)
@@ -70,37 +87,10 @@
 (global-set-key (kbd "C->") 'next-error)
 (global-set-key (kbd "C-<") 'previous-error)
 
-(add-hook 'compilation-filter-hook 'ansi-color-compilation-filter)
-
-(add-to-list 'default-frame-alist '(width . 185))
-(add-to-list 'default-frame-alist '(height . 50))
 
 (eval-after-load "dired" '(progn
   (define-key dired-mode-map [mouse-2] 'dired-mouse-find-file) ))
 
 (load custom-file)
 
-(defun kill-compilation-hard ()
-  "Kill compilation process with SIGKILL from any buffer."
-  (interactive)
-  (let ((comp-buf (get-buffer "*compilation*")))
-    (if comp-buf
-        (with-current-buffer comp-buf
-          (when (get-buffer-process comp-buf)
-            (let ((proc (get-buffer-process comp-buf)))
-              (signal-process proc 'SIGKILL)
-              (message "Compilation process killed with SIGKILL"))))
-      (message "No compilation buffer found"))))
-
-(add-hook 'prog-mode-hook #'ws-butler-mode)
-
-(defun my/turn-on-hl-line-mode ()
-  (hl-line-mode 1))
-
-(add-hook 'compilation-mode-hook #'my/turn-on-hl-line-mode)
-
-(defun my/update-compilation-hl-line ()
-  (with-current-buffer next-error-last-buffer
-    (when hl-line-mode (hl-line-highlight))))
-
-(add-hook 'next-error-hook 'my/update-compilation-hl-line)
+(add-hook 'compilation-filter-hook #'ansi-color-compilation-filter)
